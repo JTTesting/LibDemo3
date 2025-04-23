@@ -30,7 +30,7 @@ jobs:
 
       - name: Check file location
         run: |
-          $csprojPath = "D:\a\LibDemo\LibDemo\LibDemo"
+          $csprojPath = "D:\a\${{github.event.repository.name}}\${{github.event.repository.name}}"
           cd $csprojPath
           dir
           cd ..
@@ -48,52 +48,32 @@ jobs:
           echo "Version: $version"
           echo "VERSION=$version" >> $env:GITHUB_ENV
 
-      - name: Query NuGet API
-        shell: powershell
-        run: |
-          $OWNER = "${{github.repository_owner}}" # Replace with your GitHub username or organization
-          $REPO = "${{github.event.repository.name}}" # Replace with your repository name
-          $VERSION_TO_CHECK = "$env:GITHUB_ENV" # Replace with your package name
-          $TOKEN = "${{ secrets.GITHUB_TOKEN }}" # Use GitHub token
-          $API_URL = "https://api.github.com/orgs/$OWNER/packages/nuget/$REPO/versions"
-          $response = Invoke-RestMethod -Uri $API_URL -Headers @{
-            Authorization = "token $TOKEN"
-            Accept = "application/vnd.github.v3+json"
-          }
-          $response | ForEach-Object { Write-Host "Version: $($_.name)" }
-          if ($response.name -contains $VERSION_TO_CHECK) {
-            Write-Host "Version $VERSION_TO_CHECK already exists for $PACKAGE_NAME."
-            exit 1
-          } else {
-            Write-Host "Version $VERSION_TO_CHECK is available for publishing."
-          }
-
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4.1.0
         with:
           dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore "${{github.workspace}}/LibDemo.sln"
+        run: dotnet restore "${{github.workspace}}/${{github.event.repository.name}}.sln"
 
       - name: Build
-        run: dotnet build "${{github.workspace}}/LibDemo.sln"  --no-restore --configuration Release
+        run: dotnet build "${{github.workspace}}/${{github.event.repository.name}}.sln"  --no-restore --configuration Release
 
       - name: Publish
-        run: dotnet publish "${{github.workspace}}/LibDemo/LibDemo.csproj" -c Release -o libdemo
+        run: dotnet publish "${{github.workspace}}/${{github.event.repository.name}}/${{github.event.repository.name}}.csproj" -c Release -o libdemo
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: "${{github.event.repository.name}}"
-          path: libdemo/**
+          path: ${{github.event.repository.name}}/**
           if-no-files-found: error
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4.2.1
         with:
           name: "${{github.event.repository.name}}"
-          path: libdemo
+          path: ${{github.event.repository.name}}
           if-no-files-found: error
 
   pause-for-approval:
@@ -151,7 +131,7 @@ jobs:
           uses: actions/download-artifact@v4.2.1
           with:
             name: "${{github.event.repository.name}}"
-            path: libdemo/
+            path: ${{github.event.repository.name}}/
             if-no-files-found: error          
 
         - name: Extract Version from .csproj
@@ -179,4 +159,4 @@ jobs:
           run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/JTTesting/index.json"
         
         - name: Publish NuGet Package
-          run: dotnet nuget push "${{github.workspace}}\LibDemo\bin\Release\LibDemo.$env:VERSION.nupkg" --source "github"
+          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "github"

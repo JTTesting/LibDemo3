@@ -1,6 +1,6 @@
-﻿namespace LibDemo
+﻿namespace LibDemo3
 {
-    public class LibClass
+    public class LibClass3
     {
         private string _message;
         public LibClass(string message) 
@@ -9,7 +9,7 @@
         }
         public string GetMessage()
         {
-            return $"{_message} from library and Package 6 with Brian and Dave";
+            return $"{_message} from Library3";
         }
     }
 }
