@@ -3,7 +3,7 @@
     public class LibClass3
     {
         private string _message;
-        public LibClass(string message) 
+        public LibClass3(string message) 
         {
             _message = message;
         }
