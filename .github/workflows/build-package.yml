@@ -53,7 +53,7 @@ jobs:
         run: |
           $OWNER = "${{github.repository_owner}}" # Replace with your GitHub username or organization
           $REPO = "${{github.event.repository.name}}" # Replace with your repository name
-          $VERSION_TO_CHECK = "$env:GITHUB_ENV" # Replace with your package name
+          $VERSION_TO_CHECK = "$env:VERSION" # Replace with your package name
           $TOKEN = "${{ secrets.GITHUB_TOKEN }}" # Use GitHub token
           $API_URL = "https://api.github.com/orgs/$OWNER/packages/nuget/$REPO/versions"
           $response = Invoke-RestMethod -Uri $API_URL -Headers @{
