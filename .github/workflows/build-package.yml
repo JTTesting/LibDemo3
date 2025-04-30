@@ -62,7 +62,7 @@ jobs:
           }
           $response | ForEach-Object { Write-Host "Version: $($_.name)" }
           if ($response.name -contains $VERSION_TO_CHECK) {
-            Write-Host "Version $VERSION_TO_CHECK already exists for $PACKAGE_NAME."
+            Write-Host "Version $VERSION_TO_CHECK already exists for ${{github.event.repository.name}}."
             exit 1
           } else {
             Write-Host "Version $VERSION_TO_CHECK is available for publishing."
