@@ -183,7 +183,8 @@ jobs:
             $version = $csproj.Project.PropertyGroup.Version
             echo "Version: $version"
             echo "VERSION=$version" >> $env:GITHUB_ENV
-              
+
+#---Shows variables in the GitHub Context which can be used throughout the workflow.               
         - name: Dump GitHub context2
           env:
             GITHUB_CONTEXT: ${{ toJSON(github) }}
