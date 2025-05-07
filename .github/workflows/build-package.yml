@@ -21,6 +21,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+        #---This is creating a cache so we can retrieve our build artifacts later. 
+      - name: Set up cache for build
+        uses: actions/cache@v3
+        with:
+          path: "${{github.workspace}}"
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       
       - name: Dump GitHub context
         env:
@@ -38,6 +47,7 @@ jobs:
           cd ..
           dir
 
+#---Since we are creating packages based on the Version number we are checking to ensure the current Version has not already been used to create a package. 
       - name: Extract Version from .csproj
         id: extract_version
         run: |
@@ -48,6 +58,7 @@ jobs:
           echo "Version: $version"
           echo "VERSION=$version" >> $env:GITHUB_ENV
 
+#---This section uses the GitHub API to grab the Package versions and compares to the csproj version, when they match will fail and stop build. 
       - name: Query NuGet API
         shell: powershell
         run: |
@@ -68,6 +79,7 @@ jobs:
             Write-Host "Version $VERSION_TO_CHECK is available for publishing."
           }
 
+
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4.3.1
         with:
@@ -78,6 +90,7 @@ jobs:
           sed -i 's/MyName/${{ github.actor }}/g' nuget.config
           sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
 
+#---Pulls in Dependencies, need to have NuGet.Config update before if using custom nuget package feed. 
       - name: Restore dependencies
         run: dotnet restore "${{github.workspace}}/${{github.event.repository.name}}.sln"
 
@@ -95,12 +108,13 @@ jobs:
           if-no-files-found: error
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4.2.1
+        uses: actions/download-artifact@v4.3.0
         with:
           name: "${{github.event.repository.name}}"
           path: ${{github.event.repository.name}}
           if-no-files-found: error
 
+#---This section is creating a pause to wait for the code review and aproval to merge  (30 Second checks), once merged it will complete the rest of the steps. 
   pause-for-approval:
     needs: build
     runs-on: windows-2019
@@ -153,12 +167,13 @@ jobs:
             key: ${{ runner.os }}-nuget-${{ hashFiles('**/package-lock.json') }}
   
         - name: Download build artifacts
-          uses: actions/download-artifact@v4.2.1
+          uses: actions/download-artifact@v4.3.0
           with:
             name: "${{github.event.repository.name}}"
             path: ${{github.event.repository.name}}/
             if-no-files-found: error          
 
+#---retreives Version from csproj file to use as Version for NuGet Package.
         - name: Extract Version from .csproj
           id: extract_version
           run: |
@@ -182,6 +197,7 @@ jobs:
           run: |
             sed -i 's/MyName/${{ github.actor }}/g' nuget.config
             sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
-          
+  
+  #---Publishs NuGet package to GitHub packages, uses NuGet.Config for credentials. 
         - name: Publish NuGet Package
-          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "${{github.repository_owner}}"  
+          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "${{github.repository_owner}}"
