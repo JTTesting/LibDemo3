@@ -90,10 +90,6 @@ jobs:
           sed -i 's/MyName/${{ github.repository_owner }}/g' nuget.config
           sed -i 's/MyPAT/${{ secrets.Build }}/g' nuget.config
 
-      - name: Restore NuGet Config
-        run: |
-          nuget restore LibDemo3.sln -ConfigFile nuget.config
-
 #---Pulls in Dependencies, need to have NuGet.Config update before if using custom nuget package feed. 
       - name: Restore dependencies
         run: dotnet restore "${{github.workspace}}/${{github.event.repository.name}}.sln"
