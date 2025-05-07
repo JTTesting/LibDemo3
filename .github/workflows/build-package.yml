@@ -73,7 +73,7 @@ jobs:
           }
           $response | ForEach-Object { Write-Host "Version: $($_.name)" }
           if ($response.name -contains $VERSION_TO_CHECK) {
-            Write-Host "Version $VERSION_TO_CHECK already exists for $PACKAGE_NAME."
+            Write-Host "Version $VERSION_TO_CHECK already exists for ${{github.event.repository.name}}."
             exit 1
           } else {
             Write-Host "Version $VERSION_TO_CHECK is available for publishing."
@@ -84,6 +84,11 @@ jobs:
         uses: actions/setup-dotnet@v4.3.1
         with:
           dotnet-version: "8.0.x"
+
+      - name: Configure NuGet credentials
+        run: |
+          sed -i 's/MyName/${{ github.actor }}/g' nuget.config
+          sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
 
 #---Pulls in Dependencies, need to have NuGet.Config update before if using custom nuget package feed. 
       - name: Restore dependencies
@@ -195,4 +200,4 @@ jobs:
   
   #---Publishs NuGet package to GitHub packages, uses NuGet.Config for credentials. 
         - name: Publish NuGet Package
-          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "JTTesting"
+          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "${{github.repository_owner}}"
