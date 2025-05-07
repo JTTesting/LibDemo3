@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.4</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LibDemo4" Version="1.0.7"/>
+    <PackageReference Include="LibDemo4" Version="1.0.6"/>
   </ItemGroup>
   
 </Project>
