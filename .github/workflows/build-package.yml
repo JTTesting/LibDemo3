@@ -177,6 +177,9 @@ jobs:
 
         - name: List workspace contents
           run: ls -R
+
+        - name: Set API Key
+          run: nuget setApiKey ${{ secrets.GITHUB_TOKEN }} -Source "https://nuget.pkg.github.com/JTTesting"
   
         - name: Configure NuGet credentials
           run: |
