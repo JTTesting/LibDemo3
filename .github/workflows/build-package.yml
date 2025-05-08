@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+ 
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
@@ -38,6 +38,7 @@ jobs:
           cd ..
           dir
 
+#---Since we are creating packages based on the Version number we are checking to ensure the current Version has not already been used to create a packag
       - name: Extract Version from .csproj
         id: extract_version
         run: |
@@ -48,6 +49,7 @@ jobs:
           echo "Version: $version"
           echo "VERSION=$version" >> $env:GITHUB_ENV
 
+#---This section uses the GitHub API to grab the Package versions and compares to the csproj version, when they match will fail and stop build. 
       - name: Query NuGet API
         shell: powershell
         run: |
@@ -73,11 +75,13 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+#--- Updating the NuGet Config file with the username and token.
       - name: Configure NuGet credentials
         run: |
           sed -i 's/MyName/${{ github.actor }}/g' nuget.config
           sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
 
+#---Pulls in Dependencies, need to have NuGet.Config update before if using custom nuget package feed. 
       - name: Restore dependencies
         run: dotnet restore "${{github.workspace}}/${{github.event.repository.name}}.sln"
 
@@ -101,6 +105,7 @@ jobs:
           path: ${{github.event.repository.name}}
           if-no-files-found: error
 
+#---This section is creating a pause to wait for the code review and aproval to merge  (30 Second checks), once merged it will complete the rest of the steps. 
   pause-for-approval:
     needs: build
     runs-on: windows-2022
@@ -159,6 +164,7 @@ jobs:
             path: ${{github.event.repository.name}}/
             if-no-files-found: error          
 
+#---retreives Version from csproj file to use as Version for NuGet Package.
         - name: Extract Version from .csproj
           id: extract_version
           run: |
@@ -178,6 +184,7 @@ jobs:
         - name: List workspace contents
           run: ls -R
 
+#---Setting the API Key to allow publishing 
         - name: Set API Key
           run: nuget setApiKey ${{ secrets.GITHUB_TOKEN }} -Source "https://nuget.pkg.github.com/JTTesting"
   
@@ -185,6 +192,7 @@ jobs:
           run: |
             sed -i 's/MyName/${{ github.actor }}/g' nuget.config
             sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
-          
+
+  #---Publishs NuGet package to GitHub packages, uses NuGet.Config for credentials. 
         - name: Publish NuGet Package
           run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "${{github.repository_owner}}" 
