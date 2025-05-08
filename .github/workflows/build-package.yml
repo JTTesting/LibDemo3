@@ -16,7 +16,7 @@ env:
   
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
       - name: Checkout code
@@ -103,7 +103,7 @@ jobs:
 
   pause-for-approval:
     needs: build
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
         - name: Download jq
@@ -140,7 +140,7 @@ jobs:
   
   Publish:
       needs: pause-for-approval
-      runs-on: windows-2019
+      runs-on: windows-2022
       
       steps:
         - name: Checkout code
