@@ -184,4 +184,4 @@ jobs:
             sed -i 's/MyPAT/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
           
         - name: Publish NuGet Package
-          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "${{github.repository_owner}}"  
+          run: dotnet nuget push "${{github.workspace}}\${{github.event.repository.name}}\bin\Release\${{github.event.repository.name}}.$env:VERSION.nupkg" --source "JTTesting"  
