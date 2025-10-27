@@ -92,7 +92,7 @@ jobs:
         run: dotnet publish "${{github.workspace}}/${{github.event.repository.name}}/${{github.event.repository.name}}.csproj" -c Release -o libdemo
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: "${{github.event.repository.name}}"
           path: ${{github.event.repository.name}}/**
